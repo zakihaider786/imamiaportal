@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <title>Labour Payment Record - Imamia Imambara Portal</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJ0F0CXBFR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DJ0F0CXBFR');
+    </script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWaJAaK4dIungNW-r4Ko2QBAEoPJTgiy0",
+            authDomain: "imamia-8928e.firebaseapp.com",
+            projectId: "imamia-8928e",
+            storageBucket: "imamia-8928e.firebasestorage.app",
+            messagingSenderId: "991431655738",
+            appId: "1:991431655738:web:480f2d7c1f540b0d6fd003",
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                document.body.style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        nav {
+            background: #ffffff;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            color: #1a73e8;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.5rem;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            transition: color 0.2s ease;
+        }
+        .nav-links a:hover { color: #1a73e8; }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            padding: 0.75rem;
+            cursor: pointer;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            z-index: 1001;
+        }
+        .hamburger span {
+            position: absolute;
+            width: 24px;
+            height: 2px;
+            background: #333;
+            left: 8px;
+            transition: all 0.3s ease;
+        }
+        .hamburger span:nth-child(1) { top: 12px; }
+        .hamburger span:nth-child(2) { top: 19px; }
+        .hamburger span:nth-child(3) { top: 26px; }
+        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        .content {
+            margin-top: 70px;
+            padding: 2rem;
+            min-height: calc(100vh - 70px);
+            background: #f0f4f8;
+        }
+        .form-container {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #1a73e8;
+            outline: none;
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .submit-btn:hover { background: #1557b0; }
+        .submit-btn.loading {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: none;
+            z-index: 2000;
+        }
+        .popup.active { display: block; }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .overlay.active { opacity: 1; pointer-events: auto; }
+        .cards-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            text-align: center;
+        }
+        .card h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+        .card p {
+            color: #1a73e8;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            .hamburger { display: block; }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 85%;
+                max-width: 300px;
+                height: 100vh;
+                background: #ffffff;
+                flex-direction: column;
+                padding: 4rem 1rem 2rem;
+                box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease-in-out;
+                overflow-y: auto;
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a {
+                display: block;
+                width: 100%;
+                padding: 1rem 1.5rem;
+                margin: 0.5rem 0;
+                border-radius: 6px;
+                font-size: 1rem;
+                transition: background 0.2s ease;
+            }
+            .nav-links a:hover { background: #f0f4f8; color: #1a73e8; }
+            .content { padding: 1.5rem; }
+            .cards-container { flex-direction: column; }
+        }
+        @media (max-width: 480px) {
+            .form-container { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            input, select, textarea { font-size: 0.9rem; }
+            .submit-btn { font-size: 0.9rem; }
+            .card h3 { font-size: 1rem; }
+            .card p { font-size: 1.2rem; }
+        }
+        @supports (-webkit-overflow-scrolling: touch) {
+            .nav-links { -webkit-overflow-scrolling: touch; }
+        }
+        @media (hover: none) {
+            .hamburger { -webkit-tap-highlight-color: transparent; }
+        }
+    </style>
+</head>
+<body style="display: none;">
+    <div id="loading">Checking authentication...</div>
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">Imamia Imambara Portal</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Ammount Collection Data.html">Amount Collection</a></li>
+                <li><a href="Expense Form.html">Expense Form</a></li>
+                <li><a href="labour-payment-record.html">Labour Payment Record</a></li>
+                <li><a href="account.html">Account Details</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <button class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    <div class="overlay"></div>
+    <div class="content">
+        <div class="form-container">
+            <h1>Labour Payment Record</h1>
+            <form id="labourForm">
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="day">Day</label>
+                    <select id="day" name="day" required>
+                        <option value="" disabled selected>Select Day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="workerType">Worker Type</label>
+                    <select id="workerType" name="workerType" required>
+                        <option value="" disabled selected>Select Worker Type</option>
+                        <option value="Labour">Labour</option>
+                        <option value="Mistri">Mistri</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (₹)</label>
+                    <input type="number" id="amount" name="amount" min="0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentStatus">Payment Status</label>
+                    <select id="paymentStatus" name="paymentStatus" required>
+                        <option value="" disabled selected>Select Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
+            <div class="cards-container">
+                <div class="card">
+                    <h3>Mistri Expense</h3>
+                    <p id="mistriTotal">₹0</p>
+                </div>
+                <div class="card">
+                    <h3>Labour Expense</h3>
+                    <p id="labourTotal">₹0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="popup" id="popup">
+        <h2>Labour Record Submitted</h2>
+    </div>
+    <script>
+        const GOOGLE_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx8nwzN6io22ukkLKVLT9mAcaRRLTV6p7dupdB50jam3iBb7v1kqJBlp8OZwz3UtPqpSA/exec';
+
+        // Fetch and update totals
+        async function fetchTotals() {
+            try {
+                const response = await fetch(GOOGLE_SHEET_WEB_APP_URL);
+                const data = await response.json();
+
+                if (data.result === 'success' && data.data && data.data.length > 0) {
+                    let mistriTotal = 0;
+                    let labourTotal = 0;
+
+                    data.data.forEach(record => {
+                        const amount = Number(record.amount) || 0;
+                        if (record.workerType === 'Mistri') {
+                            mistriTotal += amount;
+                        } else if (record.workerType === 'Labour') {
+                            labourTotal += amount;
+                        }
+                    });
+
+                    document.getElementById('mistriTotal').textContent = `₹${mistriTotal.toLocaleString('en-IN')}`;
+                    document.getElementById('labourTotal').textContent = `₹${labourTotal.toLocaleString('en-IN')}`;
+                }
+            } catch (error) {
+                console.error('Error fetching totals:', error);
+            }
+        }
+
+        // Submit form
+        document.getElementById('labourForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            const formData = {
+                date: document.getElementById('date').value,
+                day: document.getElementById('day').value,
+                workerType: document.getElementById('workerType').value,
+                amount: document.getElementById('amount').value,
+                paymentStatus: document.getElementById('paymentStatus').value,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(GOOGLE_SHEET_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.textContent = 'Submit';
+                    submitBtn.disabled = false;
+                    showPopup();
+                    document.getElementById('labourForm').reset();
+                    fetchTotals(); // Update totals after submission
+                }, 1000);
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Error submitting record. Please try again.');
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Submit';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showPopup() {
+            const popup = document.getElementById('popup');
+            const overlay = document.querySelector('.overlay');
+            popup.classList.add('active');
+            overlay.classList.add('active');
+            setTimeout(() => {
+                popup.classList.remove('active');
+                overlay.classList.remove('active');
+            }, 2000);
+        }
+
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const overlay = document.querySelector('.overlay');
+        const body = document.body;
+
+        function toggleMenu() {
+            const isActive = hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            overlay.classList.toggle('active');
+            body.style.overflow = isActive ? 'hidden' : 'auto';
+        }
+
+        hamburger.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        overlay.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            body.style.overflow = 'auto';
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                overlay.classList.remove('active');
+                body.style.overflow = 'auto';
+            });
+        });
+
+        hamburger.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        // Load totals on page load
+        document.addEventListener('DOMContentLoaded', fetchTotals);
+    </script>
+</body>
+</html>

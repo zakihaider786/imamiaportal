@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <title>Imamia Imambara Portal - Expense Form</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJ0F0CXBFR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-DJ0F0CXBFR');
+    </script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWaJAaK4dIungNW-r4Ko2QBAEoPJTgiy0",
+            authDomain: "imamia-8928e.firebaseapp.com",
+            projectId: "imamia-8928e",
+            storageBucket: "imamia-8928e.firebasestorage.app",
+            messagingSenderId: "991431655738",
+            appId: "1:991431655738:web:480f2d7c1f540b0d6fd003",
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Authentication check
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                // User is logged in, show content
+                document.body.style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        nav {
+            background: #ffffff;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: #1a73e8;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: #1a73e8;
+        }
+
+        /* Updated Hamburger Styles */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            padding: 0.75rem;
+            cursor: pointer;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            position: absolute;
+            width: 24px;
+            height: 2px;
+            background: #333;
+            left: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 12px;
+        }
+
+        .hamburger span:nth-child(2) {
+            top: 19px;
+        }
+
+        .hamburger span:nth-child(3) {
+            top: 26px;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        .content {
+            margin-top: 70px;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 85%;
+                max-width: 300px;
+                height: 100vh;
+                background: #ffffff;
+                flex-direction: column;
+                padding: 4rem 1rem 2rem;
+                box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease-in-out;
+                overflow-y: auto;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                display: block;
+                width: 100%;
+                padding: 1rem 1.5rem;
+                margin: 0.5rem 0;
+                border-radius: 6px;
+                font-size: 1rem;
+                transition: background 0.2s ease;
+            }
+
+            .nav-links a:hover {
+                background: #f0f4f8;
+                color: #1a73e8;
+            }
+
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.4);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                z-index: 999;
+            }
+
+            .overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+
+        /* iOS and Android optimizations */
+        @supports (-webkit-overflow-scrolling: touch) {
+            .nav-links {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (hover: none) {
+            .hamburger {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+
+        .content {
+            margin-top: 70px;
+            padding: 1.5rem;
+            background: url('https://images.unsplash.com/photo-1542601098-8fc114e148e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=10') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #1a73e8, #34c759);
+        }
+
+        .form-container h2 {
+            color: #1a73e8;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: #2c2c2c;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #ffffff;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+            background: #ffffff;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            width: 100%;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #1557b0, #0b3d91);
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .loader {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .notification {
+            display: none;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 10px rgba(0, 0, AVERAGE, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 85%;
+                max-width: 300px;
+                height: 100vh;
+                background: #ffffff;
+                flex-direction: column;
+                padding: 4rem 1rem 2rem;
+                box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease-in-out;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                display: block;
+                width: 100%;
+                padding: 1rem 1.5rem;
+                margin: 0.5rem 0;
+                border-radius: 6px;
+            }
+
+            .nav-links a:hover {
+                background: #f0f4f8;
+                color: #1a73e8;
+            }
+
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.4);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                z-index: 999;
+            }
+
+            .overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            .form-container h2 {
+                font-size: 1.5rem;
+            }
+
+            input,
+            textarea,
+            select {
+                padding: 0.9rem;
+            }
+
+            .submit-btn {
+                padding: 0.9rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+
+            label {
+                font-size: 0.9rem;
+            }
+        }
+
+        @supports (-webkit-overflow-scrolling: touch) {
+            .nav-links {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .content {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (hover: none) {
+            .hamburger {
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .submit-btn:hover {
+                background: linear-gradient(135deg, #1a73e8, #0d47a1);
+                box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body style="display: none;">
+    <div id="loading">Checking authentication...</div>
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">Imamia Imambara Portal Portal</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Ammount Collection Data.html">Amount Collection</a></li>
+                <li><a href="Expense Form.html">Expense Form</a></li>
+                <li><a href="labour-payment-record.html">Labour Payment Record</a></li>
+                <li><a href="account.html">Account Details</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <button class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    <div class="overlay"></div>
+
+    <div class="content">
+        <div class="form-container">
+            <h2>Expense Form</h2>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="expenseDate">Date of Expense</label>
+                    <input type="date" id="expenseDate" name="expenseDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="expenseCategory">Expense Category</label>
+                    <select id="expenseCategory" name="expenseCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="utilities">Utilities</option>
+                        <option value="supplies">Supplies</option>
+                        <option value="events">Events</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="expenseDescription">Expense Description</label>
+                    <textarea id="expenseDescription" name="expenseDescription" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="amountSpent">Amount Spent (₹)</label>
+                    <input type="number" id="amountSpent" name="amountSpent" min="1" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="vendorName">Vendor / Supplier Name</label>
+                    <input type="text" id="vendorName" name="vendorName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method</label>
+                    <select id="paymentMethod" name="paymentMethod" required>
+                        <option value="">Select Payment Method</option>
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="netbanking">Net Banking</option>
+                        <option value="creditcard">Credit Card</option>
+                        <option value="debitcard">Debit Card</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="invoiceUpload">Invoice / Receipt Upload</label>
+                    <input type="file" id="invoiceUpload" name="invoiceUpload" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+
+                <div class="form-group">
+                    <label for="approvalStatus">Approval Status</label>
+                    <select id="approvalStatus" name="approvalStatus" required>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-text">Submit</span>
+                        <div class="loader"></div>
+                    </button>
+                </div>
+            </form>
+            <div id="notification" class="notification"></div>
+        </div>
+    </div>
+
+    <script>
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+        // Hamburger menu functionality
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const overlay = document.querySelector('.overlay');
+        const body = document.body;
+
+        function toggleMenu() {
+            const isActive = hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            overlay.classList.toggle('active');
+            body.style.overflow = isActive ? 'hidden' : 'auto';
+        }
+
+        hamburger.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        hamburger.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        overlay.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            body.style.overflow = 'auto';
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                overlay.classList.remove('active');
+                body.style.overflow = 'auto';
+            });
+        });
+
+        // Form submission
+        document.getElementById('expenseForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const submitBtn = form.querySelector('.submit-btn');
+            const loader = submitBtn.querySelector('.loader');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const notification = document.getElementById('notification');
+            const fileInput = form.querySelector('#invoiceUpload');
+
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    data.invoiceUpload = e.target.result;
+                    submitToGoogleSheets(data);
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                data.invoiceUpload = '';
+                submitToGoogleSheets(data);
+            }
+
+            function submitToGoogleSheets(formData) {
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbxxjlkkJdvHM7JfeMRPYKeZLTA9lVTcH2OkHS0JL2NSQOjqOkuxMj87ns3mylBi1xeNiA/exec';
+
+                fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'no-cors'
+                })
+                    .then(() => {
+                        notification.textContent = 'Expense submitted successfully!';
+                        notification.style.backgroundColor = '#2ecc71';
+                        form.reset();
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        notification.textContent = 'Error submitting form. Please try again.';
+                        notification.style.backgroundColor = '#e74c3c';
+                    })
+                    .finally(() => {
+                        notification.style.display = 'block';
+                        btnText.style.display = 'block';
+                        loader.style.display = 'none';
+
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 5000);
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>

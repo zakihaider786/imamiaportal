@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <title>Imamia Imambara Portal - Account Details</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJ0F0CXBFR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-DJ0F0CXBFR');
+    </script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWaJAaK4dIungNW-r4Ko2QBAEoPJTgiy0",
+            authDomain: "imamia-8928e.firebaseapp.com",
+            projectId: "imamia-8928e",
+            storageBucket: "imamia-8928e.firebasestorage.app",
+            messagingSenderId: "991431655738",
+            appId: "1:991431655738:web:480f2d7c1f540b0d6fd003",
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Authentication check
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                // User is logged in, show content
+                document.body.style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        nav {
+            background: #ffffff;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: #1a73e8;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: #1a73e8;
+        }
+
+        /* Updated Hamburger Styles */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            padding: 0.75rem;
+            cursor: pointer;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            position: absolute;
+            width: 24px;
+            height: 2px;
+            background: #333;
+            left: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 12px;
+        }
+
+        .hamburger span:nth-child(2) {
+            top: 19px;
+        }
+
+        .hamburger span:nth-child(3) {
+            top: 26px;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        .content {
+            margin-top: 70px;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 85%;
+                max-width: 300px;
+                height: 100vh;
+                background: #ffffff;
+                flex-direction: column;
+                padding: 4rem 1rem 2rem;
+                box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease-in-out;
+                overflow-y: auto;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                display: block;
+                width: 100%;
+                padding: 1rem 1.5rem;
+                margin: 0.5rem 0;
+                border-radius: 6px;
+                font-size: 1rem;
+                transition: background 0.2s ease;
+            }
+
+            .nav-links a:hover {
+                background: #f0f4f8;
+                color: #1a73e8;
+            }
+
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.4);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                z-index: 999;
+            }
+
+            .overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+
+        /* iOS and Android optimizations */
+        @supports (-webkit-overflow-scrolling: touch) {
+            .nav-links {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (hover: none) {
+            .hamburger {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            background-color: #fdf6e3;
+            /* Light background */
+            padding: 10px 0;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            position: relative;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+            font-weight: bold;
+            color: #d9534f;
+            /* red/danger color */
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Add specific styles for account page */
+        .account-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .account-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #1a73e8;
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .detail-item {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 1.25rem;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .payment-note {
+            text-align: center;
+            color: #e74c3c;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #fff3f2;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .account-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .detail-value {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body style="display: none;">
+    <div id="loading">Checking authentication...</div>
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">Imamia Imambara Portal Portal</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Ammount Collection Data.html">Amount Collection</a></li>
+                <li><a href="Expense Form.html">Expense Form</a></li>
+                <li><a href="labour-payment-record.html">Labour Payment Record</a></li>
+                <li><a href="account.html">Account Details</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <button class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    <div class="overlay"></div>
+    <div class="content">
+        <div class="marquee-container">
+            <div class="marquee-content">
+                Please double-check all payment details before transferring funds. For any discrepancies, contact the
+                administrator immediately.
+            </div>
+        </div>
+        <div class="marquee-container">
+            <div class="marquee-content">
+                कृपया धनराशि स्थानांतरित करने से पहले सभी भुगतान विवरणों को अच्छी तरह से जांचें। किसी भी गड़बड़ी की
+                स्थिति में तुरंत प्रशासक से संपर्क करें।
+            </div>
+        </div>
+
+
+
+        <div class="account-container">
+            <h1 class="account-header">Payment Account Details</h1>
+
+            <div class="detail-item">
+                <div class="detail-label">Account Holder Name</div>
+                <div class="detail-value">Zaki Haider</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Bank Account Number</div>
+                <div class="detail-value">39754359893</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">IFSC Code</div>
+                <div class="detail-value">SBIN0016168</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Google Pay</div>
+                <div class="detail-value">9369445575</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Paytm Number</div>
+                <div class="detail-value">9369445575</div>
+            </div>
+
+            <div class="payment-note">
+                ⚠️ Always verify payment details with a trusted committee member before transferring funds.
+            </div>
+            <div class="payment-note">
+                ⚠️ धनराशि स्थानांतरित करने से पहले भुगतान विवरणों की एक विश्वसनीय समिति सदस्य से पुष्टि अवश्य करें।
+            </div>
+        </div>
+    </div>
+    <script>
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+        // Hamburger menu functionality
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const overlay = document.querySelector('.overlay');
+        const body = document.body;
+
+        function toggleMenu() {
+            const isActive = hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            overlay.classList.toggle('active');
+            body.style.overflow = isActive ? 'hidden' : 'auto';
+        }
+
+        hamburger.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        hamburger.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        overlay.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            body.style.overflow = 'auto';
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                overlay.classList.remove('active');
+                body.style.overflow = 'auto';
+            });
+        });
+    </script>
+</body>
+
+</html>
