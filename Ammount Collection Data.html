@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <title>Imamia Imambara Portal - Amount Collection Form</title>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJ0F0CXBFR"></script>
     <script>
@@ -394,10 +395,12 @@
             <p>Your contribution supports the upkeep and religious activities of the Imambara.</p>
             <p>If you have any questions, feel free to contact us.</p>
             <p>Warm regards,<br>Imamia Imambara</p>
-            <button class="share-btn" onclick="shareReceipt()">Share</button>
+            <button class="share-btn" onclick="shareReceipt()">Share as PDF</button>
         </div>
     </div>
     <script>
+        const { jsPDF } = window.jspdf;
+
         function logout() {
             firebase.auth().signOut().then(() => {
                 window.location.href = 'login.html';
@@ -534,29 +537,117 @@ Your contribution supports the upkeep and religious activities of the Imambara.
 If you have any questions, feel free to contact us.
 
 Warm regards,
-Imamia Imambara 
+Imamia Imambara
             `.trim();
 
-            if (navigator.share) {
-                // Web Share API for mobile browsers
+            // Create PDF with jsPDF
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a5'
+            });
+
+            // White background
+            doc.setFillColor(255, 255, 255); // #FFFFFF
+            doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+
+            // Premium shadow effect for receipt box
+            doc.setFillColor(220, 220, 220, 0.5); // Light gray shadow (#DCDCDC, 50% opacity)
+            doc.rect(10, 15, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 30, 'F');
+            doc.setFillColor(255, 255, 255); // White receipt box
+            doc.rect(8, 13, doc.internal.pageSize.width - 16, doc.internal.pageSize.height - 26, 'F');
+
+            // Gold border
+            doc.setDrawColor(212, 175, 55); // Gold (#D4AF37)
+            doc.setLineWidth(0.5);
+            doc.rect(8, 13, doc.internal.pageSize.width - 16, doc.internal.pageSize.height - 26);
+
+            // Header
+            doc.setFont('times', 'bold');
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80); // Dark blue-gray (#2C3E50)
+            doc.text('Imamia Imambara', 74, 25, { align: 'center' });
+            doc.setFont('times', 'italic');
+            doc.setFontSize(12);
+            doc.setTextColor(127, 140, 141); // Gray (#7F8C8D)
+            doc.text('Hadiya Payment Receipt', 74, 33, { align: 'center' });
+
+            doc.setDrawColor(212, 175, 55); // Gold line
+            doc.setLineWidth(0.3);
+            doc.line(30, 40, 118, 40);
+
+            // Body (centered)
+            doc.setFont('times', 'normal');
+            doc.setFontSize(12);
+            doc.setTextColor(51, 51, 51); // Dark gray (#333)
+            let y = 50;
+            const lineHeight = 8;
+            doc.text(`Receipt No: ${receiptNo}`, 74, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(`Date: ${date}`, 74, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(`Name: ${name}`, 74, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(`Phone Number: ${phone}`, 74, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(`Purpose: Hadiya (Donation)`, 74, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(`Amount Paid: ₹${amount}`, 74, y, { align: 'center' });
+            y += lineHeight;
+            doc.text(`Payment Method: ${payment}`, 74, y, { align: 'center' });
+
+            // Footer
+            y += 15;
+            doc.setDrawColor(212, 175, 55); // Gold dashed line
+            doc.setLineDash([1, 1]);
+            doc.line(30, y, 118, y);
+            doc.setLineDash([]);
+
+            y += 15;
+            doc.setFont('times', 'italic');
+            doc.setFontSize(10);
+            doc.setTextColor(85, 85, 85); // Medium gray (#555)
+            doc.text('We sincerely thank you for your generous hadiya to Imamia Imambara.', 74, y, { align: 'center', maxWidth: 108 });
+            y += 12;
+            doc.text('Your contribution supports the upkeep and religious activities of the Imambara.', 74, y, { align: 'center', maxWidth: 108 });
+            y += 12;
+            doc.text('If you have any questions, feel free to contact us.', 74, y, { align: 'center', maxWidth: 108 });
+            y += 12;
+            doc.setFont('times', 'bold');
+            doc.setTextColor(44, 62, 80); // Dark blue-gray (#2C3E50)
+            doc.text('Warm regards,', 74, y, { align: 'center' });
+            y += 6;
+            doc.text('Imamia Imambara', 74, y, { align: 'center' });
+
+            // Generate PDF blob
+            const pdfBlob = doc.output('blob');
+            const pdfFile = new File([pdfBlob], `Receipt_${receiptNo}.pdf`, { type: 'application/pdf' });
+
+            // Share or download
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
                 navigator.share({
+                    files: [pdfFile],
                     title: 'Imamia Imambara Receipt',
-                    text: receiptText
+                    text: 'Here is your payment receipt from Imamia Imambara.'
                 }).catch((error) => {
-                    console.error('Error sharing:', error);
-                    alert('Error sharing receipt. Please try copying it manually.');
+                    console.error('Error sharing PDF:', error);
+                    alert('Error sharing receipt. Downloading instead.');
+                    downloadPDF(pdfBlob, receiptNo);
                 });
             } else {
-                // Fallback: Copy to clipboard for desktop or unsupported browsers
-                navigator.clipboard.writeText(receiptText)
-                    .then(() => {
-                        alert('Receipt copied to clipboard! You can paste it to share.');
-                    })
-                    .catch((error) => {
-                        console.error('Error copying to clipboard:', error);
-                        alert('Error copying receipt. Please manually copy the text.');
-                    });
+                downloadPDF(pdfBlob, receiptNo);
             }
+        }
+
+        function downloadPDF(blob, receiptNo) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Receipt_${receiptNo}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
