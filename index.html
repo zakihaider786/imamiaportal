@@ -481,6 +481,152 @@
                 font-size: 1.3rem;
             }
         }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-container.minimized {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a73e8, #34c759);
+            cursor: pointer;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #1a73e8, #34c759);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .chatbot-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .chatbot-header h3 {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .chatbot-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-body {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .chatbot-message {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .chatbot-message.bot img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .chatbot-message.user {
+            justify-content: flex-end;
+        }
+
+        .chatbot-message .message-text {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            max-width: 70%;
+        }
+
+        .chatbot-message.bot .message-text {
+            background: #f0f4f8;
+            color: #333;
+        }
+
+        .chatbot-message.user .message-text {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .chatbot-input {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid #ddd;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .chatbot-input button {
+            background: #1a73e8;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .chatbot-container.minimized .chatbot-header,
+        .chatbot-container.minimized .chatbot-body,
+        .chatbot-container.minimized .chatbot-input {
+            display: none;
+        }
+
+        .chatbot-container.minimized .chatbot-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 1.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .chatbot-container {
+                width: 280px;
+            }
+
+            .chatbot-container.minimized {
+                width: 50px;
+                height: 50px;
+            }
+        }
     </style>
 </head>
 
@@ -632,6 +778,26 @@
         </div>
     </div>
 
+    <!-- Chatbot Container -->
+    <div class="chatbot-container" id="chatbot" onclick="openChatbot()">
+        <div class="chatbot-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="ziya.png" alt="Ziya">
+                <h3>Ziya</h3>
+            </div>
+            <button class="chatbot-toggle" onclick="minimizeChatbot(event)">−</button>
+        </div>
+        <div class="chatbot-body" id="chatbotBody">
+            <div class="chatbot-message bot">
+                <img src="ziya.png" alt="Ziya">
+                <div class="message-text">Assalamualaikum, How may I help you?</div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Type your question...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
 
     <script>
         const COLLECTION_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbweUjb_0tIRH2JmYJQFPm8NvAR9Axqr3c1IWERQ8Fe0MMJiQuxLs7oLChfGJHgmKCfg/exec';
@@ -762,6 +928,84 @@
         hamburger.addEventListener('touchend', (e) => {
             e.preventDefault();
             toggleMenu();
+        });
+
+        // Chatbot Logic
+        const chatbot = document.getElementById('chatbot');
+        const chatbotBody = document.getElementById('chatbotBody');
+        const chatbotInput = document.getElementById('chatbotInput');
+
+        // Sample Q&A (Update with your questions)
+        const responses = [
+            {
+                keywords: ['event', 'meeting', 'schedule'],
+                answer: 'Upcoming events include a Community Meeting on April 6, 2025, at 5 PM. Check the Events card for more details!'
+            },
+            {
+                keywords: ['donation', 'contribute', 'amount'],
+                answer: 'You can contribute via the Amount Collection page. Every little bit helps our community!'
+            },
+            {
+                keywords: ['committee', 'registration'],
+                answer: 'Interested in joining? Fill out the <a href="https://imamiaportal.netlify.app/committee-registration" target="_blank">Committee Registration Form</a> by April 10, 2025.'
+            },
+
+
+            {
+                keywords: ['expense', 'spending'],
+                answer: 'View the Total Expenses card for our monthly expenditure details.'
+            }
+        ];
+
+        function minimizeChatbot(event) {
+            event.stopPropagation(); // Prevent triggering openChatbot
+            chatbot.classList.add('minimized');
+            const toggleBtn = chatbot.querySelector('.chatbot-toggle');
+            toggleBtn.textContent = '+';
+        }
+
+        function openChatbot() {
+            if (chatbot.classList.contains('minimized')) {
+                chatbot.classList.remove('minimized');
+                const toggleBtn = chatbot.querySelector('.chatbot-toggle');
+                toggleBtn.textContent = '−';
+            }
+        }
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chatbot-message ${isUser ? 'user' : 'bot'}`;
+            if (!isUser) {
+                messageDiv.innerHTML = `<img src="ziya.png" alt="Ziya"><div class="message-text">${text}</div>`;
+            } else {
+                messageDiv.innerHTML = `<div class="message-text">${text}</div>`;
+            }
+            chatbotBody.appendChild(messageDiv);
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        }
+
+        function getResponse(userInput) {
+            const input = userInput.toLowerCase();
+            for (const response of responses) {
+                if (response.keywords.some(keyword => input.includes(keyword))) {
+                    return response.answer;
+                }
+            }
+            return "Sorry, I didn’t understand. Could you clarify your question?";
+        }
+
+        function sendMessage() {
+            const userInput = chatbotInput.value.trim();
+            if (!userInput) return;
+
+            addMessage(userInput, true);
+            const response = getResponse(userInput);
+            setTimeout(() => addMessage(response), 500);
+            chatbotInput.value = '';
+        }
+
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
     </script>
 </body>
